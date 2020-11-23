@@ -15,3 +15,5 @@ If running from linux host run these:
 
 Running:
 Run `docker-compose up` to start and use Ctrl+C to stop
+
+Video: https://pitt-my.sharepoint.com/:v:/g/personal/emt68_pitt_edu/EQuxlge7X_lGv12W9ZmmZa8BBKhQqln9Bd3ZgqT83evQcQ?e=6OYWkg

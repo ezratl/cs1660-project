@@ -16,7 +16,7 @@ public class DataScienceToolbox {
 				new MicroserviceButton("Spyder", new Runnable() {
 					public void run() {
 						System.out.println("Spyder");
-						BareBonesBrowserLaunch.openURL("http://host.docker.internal:6081/vnc.html?resize=downscale");
+						BareBonesBrowserLaunch.openURL("http://host.docker.internal:6080/vnc.html?resize=downscale");
 					}
 				}),
 				new MicroserviceButton("Orange", new Runnable() {
@@ -58,7 +58,7 @@ public class DataScienceToolbox {
 				new MicroserviceButton("Hadoop", new Runnable() {
 					public void run() {
 						System.out.println("Hadoop");
-						BareBonesBrowserLaunch.openURL("http://host.docker.internal:9000/");
+						BareBonesBrowserLaunch.openURL("http://host.docker.internal:9870/");
 					}
 				}),
 		};
@@ -83,15 +83,7 @@ public class DataScienceToolbox {
         label = new JLabel("Please run one of the following applications:");
         label.setAlignmentX(Component.LEFT_ALIGNMENT);
         centerPanel.add(label);
-        /*centerPanel.add(Box.createVerticalGlue());
-        JButton chooseFilesButton = new JButton("Choose Files");
-        chooseFilesButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        centerPanel.add(chooseFilesButton);
-        centerPanel.add(Box.createVerticalGlue());*/
-        /*JButton constructButton = new JButton("Construct Inverted Indices");
-        constructButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        centerPanel.add(constructButton);
-        centerPanel.add(Box.createVerticalGlue());*/
+        
         populateServices();
         for (JButton b : services) {
         	centerPanel.add(b);
