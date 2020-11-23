@@ -1,0 +1,178 @@
+services:
+    ds-toolbox:
+        build: .
+        environment: 
+            DISPLAY: 192.168.223.81:0.0
+        volumes: 
+            - /tmp/.X11-unix:/tmp/.X11-unix
+            - ~/.Xauthority:/root/.Xauthority
+            - .:/root/working
+
+    rstudio:
+        image: "rocker/rstudio"
+        ports:
+            - "8787:8787"
+        environment: 
+            - DISABLE_AUTH=true
+        volumes:
+            - .:/home/rstudio
+          
+    spyder:
+        image: "compdatasci/spyder-desktop"
+        ports:
+            - "6080:6080" # HTML client
+            - "5900:5900"
+
+#    ibm-sas:
+
+    git:
+        image: "bitnami/git"
+
+    jupyter-notebook:
+        image: "jupyter/base-notebook"
+        command: ['start-notebook.sh', "--NotebookApp.token=''", "--NotebookApp.password=''"]
+        ports:
+            - "8888:8888"
+
+    orange:
+        image: "acopar/orange-docker"
+        ports:
+            - "5901:5901"
+            - "6901:6901" # HTML client
+        volumes:
+            - .:/home/orange/Documents
+            
+    vscode:
+        image: "linuxserver/code-server"
+        ports: 
+            - "8443:8443"
+        volumes:
+            - .:/root/working
+
+# hadoop images
+    hadoop-namenode:
+        image: "bde2020/hadoop-namenode"
+        container_name: "hadoop-namenode"
+        networks:
+            - hadoopnet
+        ports:
+            - "9870:9870"
+            - "9000:9000"
+        volumes:
+            - hadoop_namenode:/hadoop/dfs/name
+        environment:
+            - CLUSTER_NAME=demo
+        env_file:
+            - ./hadoop.env
+    hadoop-datanode:
+        image: "bde2020/hadoop-datanode"
+        container_name: "hadoop-datanode"
+        networks:
+            - hadoopnet
+        ports:
+            - "9864:9864"
+        volumes: 
+            - hadoop_datanode:/hadoop/dfs/data
+        environment: 
+            SERVICE_PRECONDITION: "hadoop-namenode:9870"
+        env_file:
+            - ./hadoop.env
+    hadoop-resman:
+        image: "bde2020/hadoop-resourcemanager"
+        container_name: "hadoop-resman"
+        networks:
+            - hadoopnet
+        environment: 
+            SERVICE_PRECONDITION: "hadoop-namenode:9000 hadoop-namenode:9870 hadoop-datanode:9864"
+        env_file:
+            - ./hadoop.env    
+    hadoop-nodeman:
+        image: "bde2020/hadoop-nodemanager"
+        container_name: "hadoop-nodeman"
+        networks:
+            - hadoopnet
+        environment: 
+            SERVICE_PRECONDITION: "hadoop-namenode:9000 hadoop-namenode:9870 hadoop-datanode:9864 hadoop-resman:8088"
+        env_file:
+            - ./hadoop.env
+    hadoop-history:
+        image: "bde2020/hadoop-historyserver"
+        container_name: "hadoop-history"
+        networks:
+            - hadoopnet
+        environment: 
+            SERVICE_PRECONDITION: "hadoop-namenode:9000 hadoop-namenode:9870 hadoop-datanode:9864 hadoop-resman:8088"
+        volumes:
+            - hadoop_historyserver:/hadoop/yarn/timeline
+        env_file:
+            - ./hadoop.env
+
+    spark:
+        image: "bitnami/spark"
+        environment: 
+            - SPARK_MODE=master
+    # tableau:
+    #     build: ./tableau
+    #     ports:
+    #         - "80:80"
+    #         - "8850:8850"
+# sonarqube images
+    sonarqube:
+        image: "sonarqube"
+        ports:
+            - "9001:9000"
+        networks:
+            - sonarnet
+        #sysctls:
+            #- vm.max_map_count=262144
+            #- fs.file-max=65536
+        environment:
+            - sonar.jdbc.url=jdbc:postgresql://db:5432/sonar
+            - sonar.jdbc.username=sonar
+            - sonar.jdbc.password=sonar
+        volumes:
+            - sonarqube_conf:/opt/sonarqube/conf
+            - sonarqube_data:/opt/sonarqube/data
+            - sonarqube_extensions:/opt/sonarqube/extensions
+            - sonarqube_bundled-plugins:/opt/sonarqube/lib/bundled-plugins  
+    sonardb:
+        image: postgres
+        networks:
+            - sonarnet
+        environment:
+            - POSTGRES_USER=sonar
+            - POSTGRES_PASSWORD=sonar
+        volumes:
+            - postgresql:/var/lib/postgresql
+            - postgresql_data:/var/lib/postgresql/data
+    sonarscanner:
+        image: "sonarsource/sonar-scanner-cli"
+
+    tensorflow:
+        image: "tensorflow/tensorflow:latest-jupyter"
+#        command: ['start-notebook.sh', "--NotebookApp.token=''", "--NotebookApp.password=''"]
+        ports:
+            - "8889:8888"
+
+    markdown:
+        image: "v4tech/markdown-editor"
+        ports:
+            - "12345:80"
+
+# networks for cross-service comms
+networks:
+    sonarnet:
+    hadoopnet:
+
+volumes:
+    # sonarqube vols
+    sonarqube_conf:
+    sonarqube_data:
+    sonarqube_extensions:
+    sonarqube_bundled-plugins:
+    postgresql:
+    postgresql_data:
+    # hadoop vols
+    hadoop_namenode:
+    hadoop_datanode:
+    hadoop_historyserver:    
